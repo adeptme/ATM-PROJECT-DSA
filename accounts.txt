@@ -1,1 +1,5 @@
+<<<<<<< Updated upstream
 ralf 2468 7978318579ralf 0856 2485774076ralf 6573 4333739687frank 2468 6726123656
+=======
+ralf 2468 7978318579Neo 1403 5041623579
+>>>>>>> Stashed changes
