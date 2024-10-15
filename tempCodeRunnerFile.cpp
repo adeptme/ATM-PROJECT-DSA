@@ -1,184 +1,162 @@
 #include <iostream>
-#include <string>
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
-#include <iomanip>
+#include <map>
+#include <string>
+#include <limits>
+#include <algorithm> 
+#include <windows.h>
+
 using namespace std;
 
-void mainMenu();
 
-struct LoginResult{       //storing login results
-    bool success;
-    string cardNumber;
+struct Account {
+   string name;
+   double balance;
+   string pin;
+   string birthday;
+   string contact;
 };
 
-class UserAccount{  //user info and storing it to file handling keme
+class create{
     private:
-        string name;
-        string pin;
-        string cardNumber;
-    public:
-        UserAccount(string _name, string _pin){   //constructor kuno (sumunod lang ako tutorial bai)
-            name= _name;
-            pin= _pin;
-            cardNumber=generateCardNum();  //generating random card num
-        }
+    map<string, Account> accounts;
+    string drivepath;
 
-        string generateCardNum(){   //generating random 10-digit num
-            string cardNum="";
-            srand(time(0));
-            for(int i=0;i<10;i++){
-                cardNum+=to_string(rand()%10);
-            }return cardNum;
-        }
+    string generateRandAccNum(){
+    int accNum = rand() % 90000 + 10000; 
+    return to_string(accNum);
+     }
+    string createPin(){
+    string pin;
+    bool is_valid = false;
 
-        //gayahin ko lang kay ku
-        void saveToFile(){     //save user info
-            ofstream file("accounts.txt",ios::app);
-            if(file.is_open()){
-                file<<name<<" "<<pin<<" "<< cardNumber;
-                file.close();
-            }else{
-                cout<<"Unable to open file.";
+    do {
+        cout << "Set a 4-digit PIN: ";
+        cin >> pin;
+
+        if (pin.length() == 4 && all_of(pin.begin(), pin.end(), ::isdigit)) {
+            is_valid = true;
+        } else {
+            cout << "Invalid PIN! Please enter exactly 4 numeric digits." << endl;
+        }
+    } while (!is_valid);
+
+    return pin;
+    }
+    bool detectFlashDrive(){
+        DWORD fd = GetLogicalDrives();
+        for(char drive = 'E'; drive <= 'Z'; drive++){
+            if(fd & (1 << (drive - 'A'))){
+                string fdpath = string(1, drive) + ":/";
+                if(GetDriveTypeA(fdpath.c_str()) == DRIVE_REMOVABLE){
+                    drivepath = fdpath + "accounts.txt";
+                    return true;
+                }
             }
         }
+        return false;
+    }
 
-        /*void saveToUsb(string name, ){
-            ofstream file("")
-        }*/
-        
-        void displayInfo(){
-            cout<<"Account created successfully!\n";
-            cout<<"Your card number is: "<< cardNumber;
+    public:
+    create(){
+        if(!detectFlashDrive()){
+            cout << "No Flash Drive Detected!" << endl;
+            system("pause");
+        } else {
+            retrieveAccounts();
+        }
+    }
+
+    void saveAccounts(){
+        if(drivepath.empty()){
+            cout << "The Flash Drive is not yet inserted." << endl;
+            system("pause");
+            return;
         }
 
-        static LoginResult login(string _name, string _pin){
-            ifstream file("accounts.txt");
-            string fileName, filePin, fileCardNumber;
-            LoginResult result={false,""}; //initialize daw
+        ofstream createFile(drivepath);
 
-            if(file.is_open()){
-                while(file>>fileName>>filePin>>fileCardNumber){
-                    if(fileName== _name && filePin== _pin){
-                        result.success=true;
-                        result.cardNumber=fileCardNumber;
-                        break;
-                    }
-                }
-            }else{
-                cout<<"Unable to open file.";
-            }return result;
+        if(!createFile){
+            cout << "Error in opening the file" << endl;
+            system("pause");
+            return;
         }
+        for(const auto& pair: accounts){
+            createFile << pair.first << " " << pair.second.pin << endl;
+        }
+
+        createFile.close();
+    }
+
+    void retrieveAccounts(){
+        ifstream createFile(drivepath);
+
+        if(!createFile){
+            cout << "No data" << endl;
+            system("pause");
+            return;
+        }
+
+        string accnum, pin;
+        while(createFile >> accnum >> pin){
+            Account acc;
+            acc.pin = pin;
+            accounts[accnum] = acc;
+        }
+        createFile.close();
+    }
+    void createAccount(map<string, Account>& accounts) {
+    string account_number;
+
+    do {
+        account_number = generateRandAccNum();  // Corrected function name
+    } while (accounts.find(account_number) != accounts.end());
+
+    Account account;
+    cout << "Enter account holder's name: ";
+    cin >> account.name;
+
+    bool valid_balance = false;
+    do {
+        cout << "Enter initial balance: ";
+        cin >> account.balance;
+        if (cin.fail()) {
+            cin.clear(); 
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clears input buffer
+            cout << "Invalid balance! Please enter a valid number." << endl;
+        } else if (account.balance < 0) {
+            cout << "Balance cannot be negative!" << endl;
+        } else {
+            valid_balance = true;
+        }
+    } while (!valid_balance);
+
+    account.pin = createPin();
+
+    accounts[account_number] = account;
+    cout << "Account created successfully! Your account number is: " << account_number << endl;
+    }
+    bool verifyPin(const Account& account) {
+    string entered_pin;
+    cout << "Enter your 4-digit PIN: ";
+    cin >> entered_pin;
+    return entered_pin == account.pin;
+    }
 };
 
-void createAccount(){
-    string name, pin;
-    cout<<"Enter your name: ";
-    cin>>name;
-    cout<<"Enter a 4-digit pin: ";
-    cin>>pin;
+int main() {
 
-    UserAccount newUser(name,pin);
-    newUser.saveToFile();
-    newUser.displayInfo();
+    class create c;
+    srand(time(0));
+
+    // Map to hold account details
+    map<string, Account> accounts;
+
+    c.createAccount(accounts);
+
+    return 0;
 }
-
-void userLogin(){
-    string name, pin;
-    cout<<"Enter your name: ";
-    cin>>name;
-    cout<<"Enter your pin: ";
-    cin>>pin;
-
-    LoginResult loginResult = UserAccount::login(name, pin);
-
-    if(loginResult.success){
-        cout<<"Login successfull!\n";
-        cout<<"Your card number is: "<<loginResult.cardNumber;
-    }else{
-        cout<<"Invalid name or pin.";
-    }
-}
-
-int main(){
-
-    int choice;
-
-    while(1){
-        mainMenu();
-        cin>>choice;
-        switch(choice){
-            case 1:
-            system("cls");
-            userLogin();
-                break;
-            case 2:
-            system("cls");
-            createAccount();
-                break;
-            case 3:
-            system("cls");
-            cout<<"Thank you for using this ATM";
-            default:
-                cout<<"Invalid choice, Please try again.";
-        }
-    } 
-}
-
-void mainMenu(){
-    cout<<"\n***************************";
-    cout<<"\n\tATM MACHINE\n";
-    cout<<"***************************";
-    cout<<"\n1.) Login";
-    cout<<"\n2.) Create Account";
-    cout<<"\n3.) Exit";
-    cout<<"\nEnter your choice: ";
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
