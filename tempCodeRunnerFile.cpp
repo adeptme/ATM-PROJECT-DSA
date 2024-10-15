@@ -142,16 +142,26 @@ void withdraw(){
 }
 
 void checkBal(){
-
-
+    double balance;
+        if(balance < 0){
+            cout<<" Your current balance is: " <<     << endl;
+        }else{
+            cout<<"MAY UTANG KA NGINAMO" << endl;
+        }
 }
 
 void bankTrans(){
 
-
 }
 
 void accSett(){
-
+    string newPin;
+    cout << "Enter new pin: ";
+    cin >> newPin;
+    if(newPin.length() == 4){
+        cout << "Pin updated successfully." << endl;
+    }else{
+        cout<<"Invalid input. Must be 4 digits." << endl;
+    }
 
 }
