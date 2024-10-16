@@ -25,10 +25,10 @@ class UserAccount{  //user info and storing it to file handling keme
             cardNumber=generateCardNum();  //generating random card num
         }
 
-        string generateCardNum(){   //generating random 10-digit num
+        string generateCardNum(){   //generating random 5-digit num
             string cardNum="";
             srand(time(0));
-            for(int i=0;i<10;i++){
+            for(int i=0;i<5;i++){
                 cardNum+=to_string(rand()%10);
             }return cardNum;
         }
@@ -37,7 +37,7 @@ class UserAccount{  //user info and storing it to file handling keme
         void saveToFile(){     //save user info
             ofstream file("accounts.txt",ios::app);
             if(file.is_open()){
-                file<<name<<" "<<pin<<" "<< cardNumber;
+                file<< name<<" "<< pin<<" "<< cardNumber;
                 file.close();
             }else{
                 cout<<"Unable to open file.";
@@ -134,3 +134,34 @@ void mainMenu(){
     cout<<"\n2.) Create Account";
     cout<<"\n3.) Exit";
     cout<<"\nEnter your choice: ";
+}
+
+void withdraw(){
+
+
+}
+
+void checkBal(){
+    double balance;
+        if(balance < 0){
+            cout<<" Your current balance is: " <<     << endl;
+        }else{
+            cout<<"MAY UTANG KA NGINAMO" << endl;
+        }
+}
+
+void bankTrans(){
+
+}
+
+void accSett(){
+    string newPin;
+    cout << "Enter new pin: ";
+    cin >> newPin;
+    if(newPin.length() == 4){
+        cout << "Pin updated successfully." << endl;
+    }else{
+        cout<<"Invalid input. Must be 4 digits." << endl;
+    }
+
+}
