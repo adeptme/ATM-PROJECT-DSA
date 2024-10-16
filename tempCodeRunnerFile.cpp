@@ -65,6 +65,12 @@ void transaction :: filetoLink(string fileName, string filePin, string fileCardN
             newaccount->balance = fileBalance;
             newaccount->next = NULL;
 
+            cout << "User: "<< newaccount->name << endl;
+            cout << "Card Number: "<< newaccount->cardNum << endl;
+            cout << "Pin: "<< newaccount->pincode << endl;
+            cout << "Balance: "<< newaccount->balance << endl << endl;
+            system("pause");
+
             if (isEmpty()){
                 accounts = newaccount;
             } else {
@@ -108,14 +114,17 @@ int transaction :: search(string acc_num, string pin){
 
     while (search != NULL){
         if (search->cardNum == acc_num){
-            login = search;
-            return 1;
+            if(search->pincode == pin){
+                login = search;
+                return 1;
+            } else {
+                return 0;
+            }
         }
         search = search->next;
     } 
     return 0;
 }
-
 void transaction :: mainMenu(){
     cout<<"\n***************************";
     cout<<"\n\tATM MACHINE\n";
@@ -131,9 +140,8 @@ void transaction :: withdraw(){
 }
 
 void transaction :: checkBal(){
-    double balance;
-        if(balance < 0){
-            cout<<" Your current balance is: " << login->balance << endl;
+        if(login->balance > 0){
+            cout<<"Your current balance is: " << login->balance << endl;
         }else{
             cout<<"MAY UTANG KA NGINAMO" << endl;
         }
@@ -158,6 +166,7 @@ void transaction :: accSett(){
 int main(){
     transaction transac;
     int choice;
+    transac.retrieve();
 
     while(1){
         transac.mainMenu();
@@ -166,6 +175,7 @@ int main(){
             case 1:
             system("cls");
             transac.userLogin();
+            transac.checkBal();
                 break;
             case 0:
             system("cls");
