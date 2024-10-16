@@ -3,6 +3,8 @@
         "xstring": "cpp",
         "xutility": "cpp",
         "iostream": "cpp",
-        "xtree": "cpp"
+        "xtree": "cpp",
+        "iosfwd": "cpp",
+        "xiosbase": "cpp"
     }
 }
