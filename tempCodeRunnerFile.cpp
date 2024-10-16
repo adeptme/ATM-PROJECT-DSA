@@ -108,14 +108,17 @@ int transaction :: search(string acc_num, string pin){
 
     while (search != NULL){
         if (search->cardNum == acc_num){
-            login = search;
-            return 1;
+            if(search->pincode == pin){
+                login = search;
+                return 1;
+            } else {
+                return 0;
+            }
         }
         search = search->next;
     } 
     return 0;
 }
-
 void transaction :: mainMenu(){
     cout<<"\n***************************";
     cout<<"\n\tATM MACHINE\n";
