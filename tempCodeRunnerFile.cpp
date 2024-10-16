@@ -65,10 +65,10 @@ void transaction :: filetoLink(string fileName, string filePin, string fileCardN
             newaccount->balance = fileBalance;
             newaccount->next = NULL;
 
-            cout << newaccount->name << endl;
-            cout << newaccount->cardNum << endl;
-            cout << newaccount->pincode << endl;
-            cout << newaccount->balance << endl << endl;
+            cout << "User: "<< newaccount->name << endl;
+            cout << "Card Number: "<< newaccount->cardNum << endl;
+            cout << "Pin: "<< newaccount->pincode << endl;
+            cout << "Balance: "<< newaccount->balance << endl << endl;
             system("pause");
 
             if (isEmpty()){
