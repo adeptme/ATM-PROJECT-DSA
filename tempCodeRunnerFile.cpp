@@ -65,6 +65,12 @@ void transaction :: filetoLink(string fileName, string filePin, string fileCardN
             newaccount->balance = fileBalance;
             newaccount->next = NULL;
 
+            cout << newaccount->name << endl;
+            cout << newaccount->cardNum << endl;
+            cout << newaccount->pincode << endl;
+            cout << newaccount->balance << endl << endl;
+            system("pause");
+
             if (isEmpty()){
                 accounts = newaccount;
             } else {
@@ -134,9 +140,8 @@ void transaction :: withdraw(){
 }
 
 void transaction :: checkBal(){
-    double balance;
-        if(balance < 0){
-            cout<<" Your current balance is: " << login->balance << endl;
+        if(login->balance > 0){
+            cout<<"Your current balance is: " << login->balance << endl;
         }else{
             cout<<"MAY UTANG KA NGINAMO" << endl;
         }
@@ -161,6 +166,7 @@ void transaction :: accSett(){
 int main(){
     transaction transac;
     int choice;
+    transac.retrieve();
 
     while(1){
         transac.mainMenu();
@@ -169,6 +175,7 @@ int main(){
             case 1:
             system("cls");
             transac.userLogin();
+            transac.checkBal();
                 break;
             case 0:
             system("cls");
