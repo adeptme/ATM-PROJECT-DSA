@@ -17,6 +17,7 @@ struct account{
     string pincode;
     int balance;
     account *next;
+    account(): balance(0), next(NULL){}
 };
 
 class transaction{  //user info and storing it to file handling keme
