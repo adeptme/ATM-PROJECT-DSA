@@ -6,142 +6,142 @@
 #include <iomanip>
 using namespace std;
 
-void mainMenu();
-
 struct LoginResult{       //storing login results
     bool success;
     string cardNumber;
 };
 
-class UserAccount{  //user info and storing it to file handling keme
+struct account{
+    string name;
+    string cardNum;
+    string pincode;
+    int balance;
+    account *next;
+    account(): balance(0), next(NULL){}
+};
+
+class transaction{  //user info and storing it to file handling keme
     private:
-        string name;
-        string pin;
-        string cardNumber;
+        account *accounts;
+        account *login;
     public:
-        UserAccount(string _name, string _pin){   //constructor kuno (sumunod lang ako tutorial bai)
-            name= _name;
-            pin= _pin;
-            cardNumber=generateCardNum();  //generating random card num
+        transaction() : accounts(NULL) {};
+        
+        bool isEmpty(){
+            return (accounts==NULL);
         }
+        void mainMenu();
 
-        string generateCardNum(){   //generating random 5-digit num
-            string cardNum="";
-            srand(time(0));
-            for(int i=0;i<5;i++){
-                cardNum+=to_string(rand()%10);
-            }return cardNum;
-        }
+        void retrieve();
+        void saveToFile();
+        void filetoLink(string fileName, string filePin, string fileCardNumber, int fileBalance);
 
-        //gayahin ko lang kay ku
-        void saveToFile(){     //save user info
+        int search(string acc_num, string pin);
+
+
+        void userLogin();
+        void withdraw();
+        void checkBal();
+        void bankTrans();
+        void accSett();
+};
+
+
+void transaction :: saveToFile(){     //save user info
             ofstream file("accounts.txt",ios::app);
             if(file.is_open()){
-                file<< name<<" "<< pin<<" "<< cardNumber;
+                file<< accounts->name<< endl << accounts->pincode<< endl << accounts->cardNum << endl << accounts->balance << endl;
                 file.close();
             }else{
                 cout<<"Unable to open file.";
             }
         }
 
-        /*void saveToUsb(string name, ){
-            ofstream file("")
-        }*/
 
-        void displayInfo(){
-            cout<<"Account created successfully!\n";
-            cout<<"Your card number is: "<< cardNumber;
+void transaction :: filetoLink(string fileName, string filePin, string fileCardNumber, int fileBalance){ // pushes data of file to a linked list
+            account *newaccount = new account();
+            newaccount->name = fileName;
+            newaccount->cardNum = fileCardNumber;
+            newaccount->pincode = filePin;
+            newaccount->balance = fileBalance;
+            newaccount->next = NULL;
+
+            cout << "User: "<< newaccount->name << endl;
+            cout << "Card Number: "<< newaccount->cardNum << endl;
+            cout << "Pin: "<< newaccount->pincode << endl;
+            cout << "Balance: "<< newaccount->balance << endl << endl;
+            system("pause");
+
+            if (isEmpty()){
+                accounts = newaccount;
+            } else {
+                accounts->next = newaccount;
+                accounts = newaccount;
+            }
         }
 
-        static LoginResult login(string _name, string _pin){
-            ifstream file("accounts.txt");
-            string fileName, filePin, fileCardNumber;
-            LoginResult result={false,""}; //initialize daw
-
-            if(file.is_open()){
-                while(file>>fileName>>filePin>>fileCardNumber){
-                    if(fileName== _name && filePin== _pin){
-                        result.success=true;
-                        result.cardNumber=fileCardNumber;
-                        break;
-                    }
-                }
-            }else{
-                cout<<"Unable to open file.";
-            }return result;
-        }
-};
-
-void createAccount(){
-    string name, pin;
-    cout<<"Enter your name: ";
-    cin>>name;
-    cout<<"Enter a 4-digit pin: ";
-    cin>>pin;
-
-    UserAccount newUser(name,pin);
-    newUser.saveToFile();
-    newUser.displayInfo();
-}
-
-void userLogin(){
-    string name, pin;
-    cout<<"Enter your name: ";
-    cin>>name;
-    cout<<"Enter your pin: ";
-    cin>>pin;
-
-    LoginResult loginResult = UserAccount::login(name, pin);
-
-    if(loginResult.success){
-        cout<<"Login successfull!\n";
-        cout<<"Your card number is: "<<loginResult.cardNumber;
-    }else{
-        cout<<"Invalid name or pin.";
+void transaction :: retrieve(){
+    ifstream file("accounts.txt", ios::app);
+    if (!file.is_open()) {
+        cout << "File Error" << endl;
+        return;
+    } 
+    string fileName, filePin, fileCardNumber;
+    int fileBalance;
+    while (file >> fileName >> filePin >> fileCardNumber >> fileBalance){
+        filetoLink(fileName, filePin, fileCardNumber, fileBalance);
     }
 }
 
-int main(){
+void transaction :: userLogin(){
+    string acc_num, pin;
+    cout<<"Enter your account number: ";
+    cin>>acc_num;
+    cout<<"Enter your pin: ";
+    cin>>pin;
 
-    int choice;
-
-    while(1){
-        mainMenu();
-        cin>>choice;
-        switch(choice){
-            case 1:
-            system("cls");
-            userLogin();
-                break;
-            case 2:
-            system("cls");
-            createAccount();
-                break;
-            case 3:
-            system("cls");
-            cout<<"Thank you for using this ATM";
-            default:
-                cout<<"Invalid choice, Please try again.";
-        }
-    } 
+    if (search(acc_num, pin) == 1){
+        cout << "\n\nLog In Successfully!!!\n";
+        system("pause"); 
+        // bank functions
+    } else {
+        cout << "\n\nAccount Number or PIN incorrect!!!\n";
+        system("pause");
+    }
 }
 
-void mainMenu(){
+int transaction :: search(string acc_num, string pin){
+    account *search = accounts;
+
+    while (search != NULL){
+        if (search->cardNum == acc_num){
+            if(search->pincode == pin){
+                login = search;
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+        search = search->next;
+    } 
+    return 0;
+}
+void transaction :: mainMenu(){
     cout<<"\n***************************";
     cout<<"\n\tATM MACHINE\n";
     cout<<"***************************";
     cout<<"\n1.) Login";
-    cout<<"\n2.) Create Account";
-    cout<<"\n3.) Exit";
+    cout<<"\n0.) Exit";
     cout<<"\nEnter your choice: ";
 }
 
-void withdraw(){
+void transaction :: withdraw(){
 
 
 }
 
-void checkBal(){
+
+void transaction :: checkBal(){
     double balance;
         if(balance > 0){
             cout<<" Your current balance is: " <<     << endl;
@@ -150,11 +150,11 @@ void checkBal(){
         }
 }
 
-void bankTrans(){
+void transaction :: bankTrans(){
 
 }
 
-void accSett(){
+void transaction :: accSett(){
     string newPin;
     cout << "Enter new pin: ";
     cin >> newPin;
@@ -164,4 +164,27 @@ void accSett(){
         cout<<"Invalid input. Must be 4 digits." << endl;
     }
 
+}
+
+int main(){
+    transaction transac;
+    int choice;
+    transac.retrieve();
+
+    while(1){
+        transac.mainMenu();
+        cin>>choice;
+        switch(choice){
+            case 1:
+            system("cls");
+            transac.userLogin();
+            transac.checkBal();
+                break;
+            case 0:
+            system("cls");
+            cout<<"Thank you for using this ATM";
+            default:
+                cout<<"Invalid choice, Please try again.";
+        }
+    } 
 }

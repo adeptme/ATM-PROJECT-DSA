@@ -5,5 +5,10 @@
         "iostream": "cpp",
         "xtree": "cpp",
         "ostream": "cpp"
+        "iosfwd": "cpp",
+        "xiosbase": "cpp",
+        "iomanip": "cpp",
+        "ctime": "cpp",
+        "fstream": "cpp"
     }
 }
