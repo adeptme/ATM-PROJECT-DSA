@@ -143,7 +143,7 @@ void withdraw(){
 
 void checkBal(){
     double balance;
-        if(balance < 0){
+        if(balance > 0){
             cout<<" Your current balance is: " <<     << endl;
         }else{
             cout<<"MAY UTANG KA NGINAMO" << endl;
