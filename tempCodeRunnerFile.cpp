@@ -140,9 +140,11 @@ void transaction :: withdraw(){
 
 }
 
+
 void transaction :: checkBal(){
-        if(login->balance > 0){
-            cout<<"Your current balance is: " << login->balance << endl;
+    double balance;
+        if(balance > 0){
+            cout<<" Your current balance is: " <<     << endl;
         }else{
             cout<<"MAY UTANG KA NGINAMO" << endl;
         }
