@@ -5,6 +5,9 @@
         "iostream": "cpp",
         "xtree": "cpp",
         "iosfwd": "cpp",
-        "xiosbase": "cpp"
+        "xiosbase": "cpp",
+        "iomanip": "cpp",
+        "ctime": "cpp",
+        "fstream": "cpp"
     }
 }
