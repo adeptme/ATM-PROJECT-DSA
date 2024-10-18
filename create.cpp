@@ -10,6 +10,22 @@
 
 using namespace std;
 
+string x; //temp for moving encrypt to be decrypt
+char ch; //storing characters
+
+string encrypt(string pin){            //encrypting
+    for(int i=0; i<pin.size(); i++){
+        pin[i] = pin[i] + 200;
+    }
+return pin;
+}
+
+string decrypt(string pin){           //decrypting
+    for(int i=0; i<pin.size(); i++){
+        pin[i] = pin[i] - 200;
+    }
+return pin;
+}
 
 struct Account {
    string name;
