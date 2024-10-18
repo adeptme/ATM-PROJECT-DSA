@@ -5,27 +5,11 @@
 #include <map>
 #include <string>
 #include <limits>
-#include <algorithm> 
+#include <algorithm>
 #include <windows.h>
+#include <conio.h>
 
 using namespace std;
-
-string x; //temp for moving encrypt to be decrypt
-char ch; //storing characters
-
-string encrypt(string pin){            //encrypting
-    for(int i=0; i<pin.size(); i++){
-        pin[i] = pin[i] + 200;
-    }
-return pin;
-}
-
-string decrypt(string pin){           //decrypting
-    for(int i=0; i<pin.size(); i++){
-        pin[i] = pin[i] - 200;
-    }
-return pin;
-}
 
 struct Account {
    string name;
@@ -35,43 +19,81 @@ struct Account {
    string contact;
 };
 
-class create{
+string encrypt(string pin){           //encryption
+    for(int i=0; i<pin.size(); i++){
+        pin[i] = pin[i] + 200;
+    }
+    return pin;
+}
+
+string decrypt(string pin){           //decryption
+    for(int i=0; i<pin.size(); i++){
+        pin[i] = pin[i] - 200;
+    }
+    return pin;
+}
+
+class create {
     private:
     map<string, Account> accounts;
     string drivepath;
 
     string generateRandAccNum(){
-    int accNum = rand() % 90000 + 10000; 
-    return to_string(accNum);
-     }
-    string createPin(){
-    string pin;
-    bool is_valid = false;
-
-    do {
-        cout << "Set a 4-digit PIN: ";
-        cin >> pin;
-
-        if (pin.length() == 4 && all_of(pin.begin(), pin.end(), ::isdigit)) {
-            is_valid = true;
-        } else {
-            cout << "Invalid PIN! Please enter exactly 4 numeric digits." << endl;
-        }
-    } while (!is_valid);
-
-    return pin;
+        int accNum = rand() % 90000 + 10000;
+        return to_string(accNum);
     }
+
+    string createPin(){
+        string pin;
+        char ch;
+
+        cout << "Enter PIN (4 or 6 digits). Press Enter to continue: ";
+
+        while(true){
+            ch = _getch();
+
+            if(ch == 8){              // backspace ASCII code
+                if(!pin.empty()){
+                    pin.pop_back();
+                    cout << "\b \b";  // delete the last character from display
+                }
+            }else if(isdigit(ch)){  
+                if(pin.length() < 6){  
+                    pin += ch;
+                    cout << '*'; 
+                }
+            }else if(ch == 13){         // enter ASCII code
+                if(pin.length() == 4 || pin.length() == 6){  
+                    break;  
+                }else{
+                    cout << "\nInvalid input. PIN must be 4 or 6 digits.\n";
+                    pin.clear();  // Clear the PIN and restart input
+                    cout << "Enter PIN (4 or 6 digits). Press Enter to continue: ";
+                }
+            }
+        }
+
+        return pin; 
+    }
+
     bool detectFlashDrive(){
         DWORD fd = GetLogicalDrives();
-        for(char drive = 'E'; drive <= 'Z'; drive++){
+        cout << "Flash drive detected: ";
+        for(char drive = 'D'; drive <= 'Z'; drive++){
             if(fd & (1 << (drive - 'A'))){
                 string fdpath = string(1, drive) + ":/";
+                
+
+                cout<<fdpath << " "; // debug
+                
+
                 if(GetDriveTypeA(fdpath.c_str()) == DRIVE_REMOVABLE){
+                    cout << "\nFlash drive detected at: " << fdpath << endl;
                     drivepath = fdpath + "accounts.txt";
                     return true;
                 }
             }
-        }
+        }cout << "\nNo removable flash drive detected."<<endl;
         return false;
     }
 
@@ -80,7 +102,7 @@ class create{
         if(!detectFlashDrive()){
             cout << "No Flash Drive Detected!" << endl;
             system("pause");
-        } else {
+        }else{
             retrieveAccounts();
         }
     }
@@ -91,24 +113,43 @@ class create{
             system("pause");
             return;
         }
+        
 
+        cout << "Saving accounts to:" << drivepath << endl; //debug
+
+        
         ofstream createFile(drivepath);
-
         if(!createFile){
             cout << "Error in opening the file" << endl;
             system("pause");
             return;
         }
-        for(const auto& pair: accounts){
-            createFile << pair.first << " " << pair.second.pin << endl;
+
+        
+        //debug
+        if (accounts.empty()){
+            cout << "No accounts to save. The accounts map is empty." << endl;
+
+            system("pause");
+            return;
         }
 
-        createFile.close();
+        
+        
+        for(const auto& pair: accounts){
+                
+                
+            //debug
+            cout << "Saving account: " << pair.first << " with PIN: " << pair.second.pin << endl;
+            
+            
+            createFile << pair.first << " " << encrypt(pair.second.pin) << endl;
+        }createFile.close();
+        cout << "Accounts saved successfully to: " << drivepath << endl; //debug
     }
 
     void retrieveAccounts(){
         ifstream createFile(drivepath);
-
         if(!createFile){
             cout << "No data" << endl;
             system("pause");
@@ -116,63 +157,98 @@ class create{
         }
 
         string accnum, pin;
+        
         while(createFile >> accnum >> pin){
             Account acc;
-            acc.pin = pin;
+            acc.pin = decrypt(pin);
             accounts[accnum] = acc;
-        }
-        createFile.close();
+        }createFile.close();
     }
-    void createAccount(map<string, Account>& accounts) {
-    string account_number;
 
-    do {
-        account_number = generateRandAccNum();  // Corrected function name
-    } while (accounts.find(account_number) != accounts.end());
+    void createAccount() {
+        
+        string account_number;
 
-    Account account;
-    cout << "Enter account holder's name: ";
-    cin >> account.name;
+        do{
+            account_number = generateRandAccNum();
+        }while(accounts.find(account_number) != accounts.end());
 
-    bool valid_balance = false;
-    do {
-        cout << "Enter initial balance: ";
-        cin >> account.balance;
-        if (cin.fail()) {
-            cin.clear(); 
-            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clears input buffer
-            cout << "Invalid balance! Please enter a valid number." << endl;
-        } else if (account.balance < 0) {
-            cout << "Balance cannot be negative!" << endl;
-        } else {
-            valid_balance = true;
+        Account account;
+        
+        cout << "Enter account holder's name: ";
+        cin >> account.name;
+
+        bool valid_balance = false;
+        do{
+            cout << "Enter initial balance: ";
+            cin >> account.balance;
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Invalid balance! Please enter a valid number." << endl;
+            }else if(account.balance < 0) {
+                cout << "Balance cannot be negative!" << endl;
+            }else{
+                valid_balance = true;
+            }
+        }while(!valid_balance);
+
+        account.pin = createPin(); 
+
+        accounts[account_number] = account;
+        cout << "\nAccount created successfully! \nYour account number is: " << account_number << endl;
+
+        
+        //debug
+        if(accounts.find(account_number) != accounts.end()){
+            cout << "Account added: " << account_number << endl;
+        }else{
+            cout<<"Account not added." << endl;
         }
-    } while (!valid_balance);
 
-    account.pin = createPin();
+        
 
-    accounts[account_number] = account;
-    cout << "Account created successfully! Your account number is: " << account_number << endl;
+        
+        saveAccounts();
     }
+
     bool verifyPin(const Account& account) {
-    string entered_pin;
-    cout << "Enter your 4-digit PIN: ";
-    cin >> entered_pin;
-    return entered_pin == account.pin;
+        string entered_pin;
+        cout << "Enter your 4 or 6-digit PIN: ";
+
+        char ch;
+        while(true){
+            ch = _getch();
+
+            if(ch == 8){                    // backspace ASCII code
+                if(!entered_pin.empty()){
+                    entered_pin.pop_back();
+                    cout << "\b \b";  
+                }
+            }else if(isdigit(ch)){
+                if(entered_pin.length() < 6){
+                    entered_pin += ch;
+                    cout << '*';
+                }
+            }else if(ch == 13){                // enter ASCII code
+                if(entered_pin.length() == 4 || entered_pin.length() == 6){
+                    break;
+                }else{
+                    cout << "\nInvalid input. PIN must be 4 or 6 digits.";
+                    entered_pin.clear();
+                    cout << "\nEnter your 4 or 6-digit PIN: ";
+                }
+            }
+        }return entered_pin == decrypt(account.pin);
     }
 };
 
 int main() {
-
+    
     class create c;
     srand(time(0));
 
-    // Map to hold account details
-    map<string, Account> accounts;
-
-    c.createAccount(accounts);
+    c.createAccount();
 
     return 0;
 }
-
-
