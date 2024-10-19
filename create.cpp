@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <windows.h>
 #include <conio.h>
-#include <unistd.h>
 
 using namespace std;
 
@@ -202,7 +201,7 @@ class create {
         if (detectFlashDrive() == false) {
             system("cls");
             cout << "PLEASE INSERT A FLASH DRIVE." << endl;
-            sleep(1);
+            Sleep(1);
             idleUSB(c);
     }else{
         return;
