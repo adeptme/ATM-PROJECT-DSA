@@ -91,15 +91,15 @@ private:
 public:
     Create () : first(NULL), last(NULL) {};
 
-    void detect() {
+    /*void detect() {
         if (!detectFlashDrive()) {
             cout << "No Flash Drive Detected!" << endl;
             system("pause");
         }
         else {
-            retrieveAccounts();
+            //retrieveAccounts();
         }
-    }
+    }*/
 
     bool isEmpty() {
         return (first == NULL && last == NULL);
@@ -117,10 +117,16 @@ public:
                 if (GetDriveTypeA(fdpath.c_str()) == DRIVE_REMOVABLE) {
                     cout << "\nFlash drive detected at: " << fdpath << endl;
                     drivepath = fdpath + "ATMaccount.txt";
-                    return true;
-                }
+                    ifstream file(drivepath);
+                        if (file.good()){
+                            cout << "Account already created." << endl << "Terminating Program";
+                            exit(0);
+                        } else {
+                            return true;
+                        }
+                    }
+                } 
             }
-        }
         cout << "\nNo removable flash drive detected." << endl;
         return false;
     }
@@ -233,7 +239,7 @@ void DatatoLink(string fileName, string filePin, string fileCardNum, string file
     }
 }
     
-    void retrieveAccounts() {
+    /*void retrieveAccountinUSB() {
         ifstream createFile(drivepath);
         if (!createFile) {
             cout << "No data" << endl;
@@ -248,7 +254,7 @@ void DatatoLink(string fileName, string filePin, string fileCardNum, string file
             accounts[accnum] = acc;
         }
         createFile.close();
-    }
+    }*/
 
     void createAccount() {
     string tName, tPin, tCardNum, tBalance, tBirthday, tContactNum;
@@ -321,13 +327,25 @@ void LinktoDatabase(string fileName, string filePin, string fileCardNum, string 
             cout << "Unable to open file." << endl;
         }
     }
+
+    void idleUSB(Create &c) {
+        if (detectFlashDrive() == false) {
+            system("cls");
+            cout << "PLEASE INSERT A FLASH DRIVE." << endl;
+            Sleep(1);
+            idleUSB(c);
+    }else{
+        cout << "FLASH DRIVE DETECTED";
+        return;
+    }
+}
 };
 
 
 int main() {
     srand(time(0));
     Create c;
-    c.detect();
+    c.idleUSB(c);
     c.retrieveFromDatabase();
     c.createAccount();
 
