@@ -32,6 +32,7 @@ class transaction{  //user info and storing it to file handling keme
         account *accounts;
         account *login;
         string drivepath;
+        string fdpath;
     public:
         transaction() : first(NULL), accounts(NULL), login (NULL) {};
         
@@ -44,19 +45,19 @@ class transaction{  //user info and storing it to file handling keme
         cout << "Flash drive detected: ";
         for (char drive = 'D'; drive <= 'Z'; drive++) {
             if (fd & (1 << (drive - 'A'))) {
-                string fdpath = string(1, drive) + ":/";
+                fdpath = string(1, drive) + ":/"; // makes a string storing the path to drive
 
                 cout << fdpath << " "; // debug
 
                 if (GetDriveTypeA(fdpath.c_str()) == DRIVE_REMOVABLE) {
                     cout << "\nFlash drive detected at: " << fdpath << endl;
-                    drivepath = fdpath + "ATMaccount.txt";
+                    drivepath = fdpath + "ATMaccount.txt"; // directory of ATMAccount.txt in the drive
                     ifstream file(drivepath);
-                        if (file.good()){
+                        if (file.good()){ // program proceeds to logging in
                             cout << "Account in USB exists.";
                             return true;
-                        } else {
-                            cout << "Account not registered.";
+                        } else { // exits program as file does not exist
+                            cout << "Card is not registered.";
                             exit(0);
                         }
                     }
@@ -78,10 +79,21 @@ class transaction{  //user info and storing it to file handling keme
         return false;
     }
 
-    string decryptPin(const string& encryptedPin){
-        string decryptedPin = encryptedPin;
-        return decryptedPin;
+string decrypt(string pin) {           // decryption
+    for (int i = 0; i < pin.size(); i++) {
+        pin[i] = pin[i] - 200;
     }
+    return pin;
+}
+
+
+    string encrypt(string pin) {           // encryption
+    for (int i = 0; i < pin.size(); i++) {
+        pin[i] = pin[i] + 200;
+    }
+    return pin;
+}
+
 
         void mainMenu();
 
@@ -92,7 +104,7 @@ class transaction{  //user info and storing it to file handling keme
         bool search(string acc_num, string pin);
         bool validateLoginOnBoth(string acc_num, string pin); 
         bool searchInUSB(string acc_num, string pin);
-        bool validateOnBoth(string acc_num, string pin, string (*decryptFunc)(const string&));
+        //bool validateOnBoth(string acc_num, string pin, string (*decryptFunc)(const string&));
         void idleUSB(transaction transac);
         
         void userLogin();
@@ -101,10 +113,8 @@ class transaction{  //user info and storing it to file handling keme
         void bankTrans();
         void accSett();
         void updateAccount(const account& updatedAccount);
-        void updatePinInFile(const string& accountNumber, const string& newPin);
+        void updatePinInFile(const account& updatedAccount, string newPin);
         void loginWithFlashDrive();
-
-
 };
 
 
@@ -112,7 +122,7 @@ void transaction :: saveToFile(){
         ofstream file("accounts.txt");
             if(file.is_open()){
                 while(file.is_open()){
-                    file << first->name << endl
+                    file << endl << first->name << endl
                     << first->pincode << endl
                     << first->cardNum << endl
                     << first->balance << endl
@@ -148,7 +158,7 @@ void transaction :: filetoLink(string fileName, string filePin, string fileCardN
             cout << "User: "<< newaccount->name << endl;
             cout << "Card Number: "<< newaccount->cardNum << endl;
             cout << "Pin: "<< newaccount->pincode << endl;
-            cout << "Balance: "<< newaccount->balance << endl << endl;
+            cout << "Balance: "<< newaccount->balance << endl;
             cout << "Birthday: "<< newaccount->birthday << endl;
             cout << "Contact Number: "<< newaccount->contact << endl << endl;
             system("pause");
@@ -169,8 +179,11 @@ void transaction :: retrieve(){
         cout << "File Error" << endl;
         return;
     } 
+    string skip;
     string fileName, filePin, fileCardNumber, fileBalance, fileBirthday, fileContact;
+    
     while (!file.eof()){
+        getline(file, skip); // to skip 1st line
         getline(file, fileName);
         getline(file, filePin);
         getline(file, fileCardNumber);
@@ -189,11 +202,11 @@ bool transaction::validateLoginOnBoth(string acc_num, string pin) {
 void transaction :: userLogin(){
 
     cout << "User: "<< first->name << endl;
-            cout << "Card Number: "<< first->cardNum << endl;
-            cout << "Pin: "<< first->pincode << endl;
-            cout << "Balance: "<< first->balance << endl << endl;
-            cout << "Birthday: "<< first->birthday << endl;
-            cout << "Contact Number: "<< first->contact << endl << endl;
+    cout << "Pin: "<< first->pincode << endl;
+    cout << "Card Number: "<< first->cardNum << endl;
+    cout << "Balance: "<< first->balance << endl << endl;
+    cout << "Birthday: "<< first->birthday << endl;
+    cout << "Contact Number: "<< first->contact << endl << endl;
 
     string acc_num, pin;
     cout<<"Enter your account number: ";
@@ -250,6 +263,7 @@ void transaction::withdraw() {
         login->balance = std::to_string(bal);  
 
         cout << "Withdrawal successful! Remaining balance: " << fixed << setprecision(2) << bal << endl;
+        saveToFile();
     } else {
         cout << "Insufficient balance!\n";
     }
@@ -273,11 +287,12 @@ bool transaction::searchInUSB(string acc_num, string pin) {
         return false;
     }
     
-    string fileCardNumber, encryptedPin, balance;
-    while (file >> fileCardNumber >> encryptedPin >> balance) {
+    string fileCardNumber, encryptedPin;
+    while (file >> fileCardNumber >> encryptedPin) {
         if (fileCardNumber == acc_num) {
             // Decrypt the PIN
-            string decryptedPin = decryptPin(encryptedPin);
+            string decryptedPin = decrypt(encryptedPin);
+            cout << endl << "Decryted Pin: " << decryptedPin << endl;
 
             // Compare decrypted PIN with the user's input PIN
             if (decryptedPin == pin) {
@@ -394,6 +409,7 @@ void transaction::updateAccount(const account& updatedAccount) {
 }
 
 void transaction::loginWithFlashDrive() {
+
     string acc_num, pin;
     cout << "Enter your account number: ";
     cin >> acc_num;
@@ -441,86 +457,24 @@ void transaction::accSett() {
     cout << "\nPIN updated successfully." << endl;
 
     updateAccount(*login);
+    updatePinInFile(*login, newPin);
 }
 
-void transaction::updatePinInFile(const string& accountNumber, const string& newPin) {
-    string filePath = "D:/ATMaccounts.txt";
-    ifstream inFile(filePath);
-    ofstream outFile("D:/temp.txt");
-    string line;
-    bool found = false;
+void transaction::updatePinInFile(const account& updatedAccount, string newPin) {
 
-    if (!inFile.is_open() || !outFile.is_open()) {
+    ofstream changefile(drivepath);
+
+    if (!changefile.is_open()) {
         cout << "Error opening file!" << endl;
         return;
     }
 
-    // Read the file line by line
-    while (getline(inFile, line)) {
-        stringstream ss(line);
-        string accountNum, pin, balance;
-
-        ss >> accountNum >> pin >> balance;
-
-        if (accountNum == accountNumber) {
-            found = true;
-            outFile << accountNum << " " << newPin << " " << balance << endl;
-        } else {
-            outFile << line << endl;
-        }
+    
+    changefile << updatedAccount.cardNum << " " << encrypt(newPin);
+    cout << "Account PIN in USB changed!" << endl;
+    changefile.close();
+    
     }
-
-    inFile.close();
-    outFile.close();
-
-    if (found) {
-        remove(filePath.c_str());
-        rename("D:/temp.txt", filePath.c_str());  
-        cout << "PIN updated in ATMaccounts.txt." << endl;
-    } else {
-        cout << "Account not found in ATMaccounts.txt." << endl;
-        remove("D:/temp.txt"); 
-    }
-}
-
-bool transaction::validateOnBoth(string acc_num, string pin, string (*decryptFunc)(const string&)) {
-    account* inAcc = first;
-    while(inAcc != NULL) {
-        if(inAcc->cardNum == acc_num) {
-            if(inAcc->pincode == pin) {
-                ifstream file(drivepath);
-                if(!file.is_open()) {
-                    cout << "Error opening file." << endl;
-                    return false;
-                }
-                
-                string line, fileCardNum, encPinUSB, decPinUSB;
-                while(getline(file, line)) {
-                    stringstream ss(line);
-                    ss >> fileCardNum >> encPinUSB;
-                    if(fileCardNum == acc_num) {
-                        // Use the function pointer to decrypt
-                        decPinUSB = decryptFunc(encPinUSB);
-                        
-                        if(decPinUSB == pin) {
-                            file.close();
-                            return true;
-                        } else {
-                            file.close();
-                            return false;
-                        }
-                    }
-                }
-                file.close();
-                return false;
-            } else {
-                return false;
-            }
-        }
-        inAcc = inAcc->next;
-    }
-    return false;
-}
 
 void transaction:: idleUSB(transaction transac) {
         if (detectFlashDrive() == false) {
@@ -540,24 +494,26 @@ int main() {
     int choice;
     transac.retrieve();
     transac.idleUSB(transac);
-
+    
     while (1) {
         transac.mainMenu();
         cin >> choice;
         switch (choice) {
             case 1:
+            while(1){
                 system("cls");
-
+                transac.userLogin();
+                
                 // Detect flash drive before login
                 if (transac.detectFlashDrive()) {
-                    transac.loginWithFlashDrive();
-                } else {
-                    transac.userLogin();
-                }
-
-                transac.checkBal();
-                transac.withdraw();
-                transac.saveToFile();
+                    transac.checkBal();
+                    transac.withdraw();
+                    
+                    transac.bankTrans();
+                    transac.accSett();
+                    break;
+                        }    
+                    }
                 break;
 
             case 0:
