@@ -43,7 +43,7 @@ private:
     Account* first; // points to first account
     Account* last; // points to last account
 
-    map<string, Account> accounts;
+    //map<string, Account> accounts;
     string drivepath;
 
     string generateRandAccNum() {
@@ -209,9 +209,11 @@ public:
     string tName, tPin, tCardNum, tBalance, tBirthday, tContactNum;
 
     // Generate a unique account number
+    Account* search = first;
     do {
         tCardNum = generateRandAccNum();
-    } while (accounts.find(tCardNum) != accounts.end());  // Check if the account number already exists
+        search = search->next;
+    } while (search != NULL);  // Check if the account number already exists
 
     cout << "\nEnter account holder's name: ";
     //cin.ignore();
