@@ -43,7 +43,7 @@ private:
     Account* first; // points to first account
     Account* last; // points to last account
 
-    map<string, Account> accounts;
+    //map<string, Account> accounts;
     string drivepath;
 
     string generateRandAccNum() {
@@ -91,81 +91,49 @@ private:
 public:
     Create () : first(NULL), last(NULL) {};
 
-    /*void detect() {
-        if (!detectFlashDrive()) {
-            cout << "No Flash Drive Detected!" << endl;
-            system("pause");
-        }
-        else {
-            //retrieveAccounts();
-        }
-    }*/
+    bool isEmpty();
+    bool detectFlashDrive();
+    bool verifyPin(const Account& account);
+    void retrieveFromDatabase();
+    void saveAccounts(string tCardNum, string tPin);
+    void DatatoLink(string fileName, string filePin, string fileCardNum, string fileBalance, string fileBirthday, string fileContactNum);
+    void createAccount();
+    void LinktoDatabase(string fileName, string filePin, string fileCardNum, string fileBalance, string fileBirthday, string fileContactNum);
+    void idleUSB(Create create);
+    
+};
 
-    bool isEmpty() {
+    bool Create :: isEmpty() {
         return (first == NULL && last == NULL);
     }
 
-    bool detectFlashDrive() {
+    bool Create :: detectFlashDrive() {
         DWORD fd = GetLogicalDrives();
         cout << "Flash drive detected: ";
         for (char drive = 'D'; drive <= 'Z'; drive++) {
-            if (fd & (1 << (drive - 'A'))) {
-                string fdpath = string(1, drive) + ":/";
+            if (fd & (1 << (drive - 'A'))) { // drive checker
+                string fdpath = string(1, drive) + ":/"; // makes a string storing the path to drive
 
                 cout << fdpath << " "; // debug
 
                 if (GetDriveTypeA(fdpath.c_str()) == DRIVE_REMOVABLE) {
                     cout << "\nFlash drive detected at: " << fdpath << endl;
-                    drivepath = fdpath + "ATMaccount.txt";
+                    drivepath = fdpath + "ATMaccount.txt"; // directory of ATMAccount.txt in the drive
                     ifstream file(drivepath);
-                        if (file.good()){
+                        if (file.good()){ // exits program as file exists
                             cout << "Account already created." << endl << "Terminating Program";
                             exit(0);
-                        } else {
-                            return true;
+                        } else { // file does not exist 
+                            return true; 
                         }
                     }
                 } 
-            }
+            } // no flash drive found
         cout << "\nNo removable flash drive detected." << endl;
         return false;
     }
 
-    bool verifyPin(const Account& account) {
-        string entered_pin;
-        cout << "Enter your 4 or 6-digit PIN: ";
-
-        char ch;
-        while (true) {
-            ch = _getch();
-
-            if (ch == 8) {                    // backspace ASCII code
-                if (!entered_pin.empty()) {
-                    entered_pin.pop_back();
-                    cout << "\b \b";
-                }
-            }
-            else if (isdigit(ch)) {
-                if (entered_pin.length() < 6) {
-                    entered_pin += ch;
-                    cout << '*';
-                }
-            }
-            else if (ch == 13) {                // enter ASCII code
-                if (entered_pin.length() == 4 || entered_pin.length() == 6) {
-                    break;
-                }
-                else {
-                    cout << "\nInvalid input. PIN must be 4 or 6 digits.";
-                    entered_pin.clear();
-                    cout << "\nEnter your 4 or 6-digit PIN: ";
-                }
-            }
-        }
-        return entered_pin == decrypt(account.pin);
-    }
-
-    void saveAccounts() {
+    void Create :: saveAccounts(string tCardNum, string tPin) {
         if (drivepath.empty()) {
             cout << "The Flash Drive is not yet inserted." << endl;
             system("pause");
@@ -186,15 +154,12 @@ public:
             system("pause");
             return;
         }
-
-        for (const auto& pair : accounts) {
-            createFile << pair.first << " " << encrypt(pair.second.pin) << endl;
-        }
+        createFile << tCardNum << " " << encrypt(tPin); 
         createFile.close();
         cout << "Accounts saved successfully to: " << drivepath << endl; // debug
     }
 
-    void retrieveFromDatabase(){
+    void Create :: retrieveFromDatabase(){
         ifstream file("accounts.txt", ios::app);
             if (!file.is_open()) {
                 cout << "File Error" << endl;
@@ -210,9 +175,10 @@ public:
             getline(file, fileContactNum);     // Read contact number
             DatatoLink(fileName, filePin, fileCardNumber, fileBalance, fileBirthday, fileContactNum);
         }
+        file.close();
     }
 
-void DatatoLink(string fileName, string filePin, string fileCardNum, string fileBalance, string fileBirthday, string fileContactNum){
+    void Create :: DatatoLink(string fileName, string filePin, string fileCardNum, string fileBalance, string fileBirthday, string fileContactNum){
     Account* newAccount = new Account();
     newAccount->name = fileName;
     newAccount->balance = fileBalance;
@@ -222,14 +188,14 @@ void DatatoLink(string fileName, string filePin, string fileCardNum, string file
     newAccount->contact = fileContactNum;   // Set contact number
     newAccount->next = NULL;
 
-    // Debugging the content of the new account
+   /* // Debugging the content of the new account
     cout << "User: " << newAccount->name << endl;
     cout << "Card Number: " << newAccount->cardNum << endl;
     cout << "Pin: " << newAccount->pin << endl;
     cout << "Balance: " << newAccount->balance << endl;
     cout << "Birthday: " << newAccount->birthday << endl;  // Display birthday
     cout << "Contact Number: " << newAccount->contact << endl;  // Display contact number
-    system("pause");
+    system("pause");*/
 
     if (isEmpty()) {
         first = last = newAccount;
@@ -238,33 +204,18 @@ void DatatoLink(string fileName, string filePin, string fileCardNum, string file
         last = newAccount;
     }
 }
-    
-    /*void retrieveAccountinUSB() {
-        ifstream createFile(drivepath);
-        if (!createFile) {
-            cout << "No data" << endl;
-            system("pause");
-            return;
-        }
 
-        string accnum, pin;
-        while (createFile >> accnum >> pin) {
-            Account acc;
-            acc.pin = decrypt(pin);
-            accounts[accnum] = acc;
-        }
-        createFile.close();
-    }*/
-
-    void createAccount() {
+    void Create :: createAccount() {
     string tName, tPin, tCardNum, tBalance, tBirthday, tContactNum;
 
     // Generate a unique account number
+    Account* search = first;
     do {
         tCardNum = generateRandAccNum();
-    } while (accounts.find(tCardNum) != accounts.end());  // Check if the account number already exists
+        search = search->next;
+    } while (search != NULL);  // Check if the account number already exists
 
-    cout << "Enter account holder's name: ";
+    cout << "\nEnter account holder's name: ";
     //cin.ignore();
     getline(cin, tName);
 
@@ -295,32 +246,32 @@ void DatatoLink(string fileName, string filePin, string fileCardNum, string file
     
     cout << "\nAccount created successfully! \nYour account number is: " << tCardNum << endl;
 
+
     // Add the new account to the linked list
     LinktoDatabase(tName, tPin, tCardNum, tBalance, tBirthday, tContactNum); // reuse function
 
     // Save the updated accounts to file
-    saveAccounts();  // This saves the current accounts to the flash drive
+    saveAccounts(tCardNum, tPin);  // This saves the current accounts to the flash drive
 }
 
-void LinktoDatabase(string fileName, string filePin, string fileCardNum, string fileBalance, string fileBirthday, string fileContactNum) {
+    void Create :: LinktoDatabase(string fileName, string filePin, string fileCardNum, string fileBalance, string fileBirthday, string fileContactNum) {
         ofstream file("accounts.txt", ios::app); // Open in append mode
         if (file.is_open()) {
             Account* current = last;
         string tName, tPin, tCardNum, tBalance, tBirthday, tContactNum;
             while (current != NULL) {
-                file << endl;
                 file << fileName << endl
                     << filePin << endl
                     << fileCardNum << endl
                     << fileBalance << endl
                     << fileBirthday << endl  // Save birthday
-                    << fileContactNum;       // Save contact number
+                    << fileContactNum << endl;       // Save contact number
 
                 current = current->next;
                 
-                if (current != NULL) {
+                /*if (current != NULL) {
                     file << endl; // Add a new line between accounts
-                }
+                }*/
             }
             file.close();  // Close the file after writing
         } else {
@@ -328,26 +279,24 @@ void LinktoDatabase(string fileName, string filePin, string fileCardNum, string 
         }
     }
 
-    void idleUSB(Create &c) {
+    void Create :: idleUSB(Create create) {
         if (detectFlashDrive() == false) {
             system("cls");
             cout << "PLEASE INSERT A FLASH DRIVE." << endl;
             Sleep(1);
-            idleUSB(c);
+            idleUSB(create);
     }else{
         cout << "FLASH DRIVE DETECTED";
         return;
     }
 }
-};
-
 
 int main() {
+    Create create;
     srand(time(0));
-    Create c;
-    c.idleUSB(c);
-    c.retrieveFromDatabase();
-    c.createAccount();
+    create.idleUSB(create);
+    create.retrieveFromDatabase();
+    create.createAccount();
 
     return 0;
 }
