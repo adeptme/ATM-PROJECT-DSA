@@ -110,6 +110,7 @@ class transaction{  //user info and storing it to file handling keme
         
         void changePIN();
         void withdraw();
+        void deposit();
         void checkBal();
         void bankTrans();
         void accSett();
@@ -373,43 +374,33 @@ void transaction::loginWithFlashDrive() {
     }
 }
 
-/*
-void transaction::accSett() {
-    string newPin;
-    cout << "Enter new PIN (4 digits): ";
+void transaction::deposit(){
+    float damount = 0;
+    char dec;
+    int bal = std::stoi(login->balance);
 
-    while (true) {
-        newPin.clear();
-        char ch;
-        while (newPin.length() < 4) {
-            ch = _getch();
-            if (isdigit(ch)) {
-                newPin += ch;
-                cout << '*';  
-            } else if (ch == 13) { 
-                break;
-            } else if (ch == 8 && !newPin.empty()) {
-                newPin.pop_back();
-                cout << "\b \b";
+    while(true){
+        cout << "Enter amount to deposit: ";
+        cin >> damount;
+
+        if(damount >= 5000){
+            bal += damount;
+            login->balance = to_string(bal);
+            cout << "Successfully deposited " << damount << "to account!" << endl;
+            return;
+        } else {
+            cout << "Below minimum deposit, do you want to try again?" << endl;
+            cin >> dec;
+
+            if(dec == 'n' | dec == 'N'){
+                return;
+            } else if(dec == 'y' | dec == 'Y'){
+                system("cls");
+                damount = 0;
             }
         }
-
-        if (newPin.length() == 4) {
-            break;
-        } else {
-            cout << "\nInvalid input. PIN must be exactly 4 digits." << endl;
-            cout << "Enter new PIN (4 digits): ";
-        }
     }
-
-   
-    login->pincode = newPin; 
-
-    cout << "\nPIN updated successfully." << endl;
-
-    //updateAccount(*login);
-    //updatePinInFile(*login, newPin);
-} */
+}
 
 void transaction :: changePIN(){
     string newPin;
@@ -471,8 +462,9 @@ int main() {
                 if (transac.userLogin() == true) {
                     
                     transac.checkBal();
-                    //transac.withdraw();
-                    //transac.bankTrans();
+                    transac.withdraw();
+                    transac.deposit();
+                    transac.bankTrans();
                     transac.changePIN();
                     break;
                         }    
