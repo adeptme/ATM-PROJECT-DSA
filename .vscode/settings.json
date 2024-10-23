@@ -4,7 +4,11 @@
         "xutility": "cpp",
         "iostream": "cpp",
         "xtree": "cpp",
+        "ostream": "cpp"
         "iosfwd": "cpp",
-        "xiosbase": "cpp"
+        "xiosbase": "cpp",
+        "iomanip": "cpp",
+        "ctime": "cpp",
+        "fstream": "cpp"
     }
 }
