@@ -111,6 +111,7 @@ class transaction{  //user info and storing it to file handling keme
         void changePIN();
         void withdraw();
         void checkBal();
+        void deposit();
         void bankTrans();
         void accSett();
         void updateAccount(const account& updatedAccount);
@@ -297,6 +298,34 @@ void transaction::withdraw() {
     }
 }
 
+void transaction::deposit(){
+    float damount = 0;
+    char dec;
+    int bal = std::stoi(login->balance);
+
+    while(true){
+        cout << "Enter amount to deposit: ";
+        cin >> damount;
+
+        if(damount >= 5000){
+            bal += damount;
+            login->balance = to_string(bal);
+            cout << "Successfully deposited " << damount << "to account!" << endl;
+            return;
+        } else {
+            cout << "Below minimum deposit, do you want to try again?" << endl;
+            cin >> dec;
+
+            if(dec == 'n' || dec == 'N'){
+                return;
+            } else if(dec == 'y' || dec == 'Y'){
+                system("cls");
+                damount = 0;
+            }
+        }
+    }
+}
+
 void transaction :: checkBal(){
     string balance;
     double bal = std::stoi(login->balance);
@@ -472,8 +501,10 @@ int main() {
                     
                     transac.checkBal();
                     //transac.withdraw();
+                    transac.deposit();
                     //transac.bankTrans();
-                    transac.changePIN();
+                    //transac.changePIN();
+                    transac.saveToFile();
                     break;
                         }    
                     }
