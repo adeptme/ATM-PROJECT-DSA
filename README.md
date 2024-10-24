@@ -1,10 +1,10 @@
 <h1 align="center">🖥️ATM MACHINE PROJECT in DSA💳</h1>
 
 🧑‍💻 Developers: 
-- Sean Lucino
-- Ralf Neis
-- Neo Gariando
-- Raphael Espiritu
+- [Sean Lucino](https://github.com/adeptme)
+- [Ralf Neis](https://github.com/RalfNeis)
+- [Neo Gariando](https://github.com/Neyoo14)
+- [Raphael Espiritu](https://github.com/emikss)
  ---
 This project is a Automated Teller Machine built in **C++ Language** which instead of using an **ATM CARD**, it will use a *flash drive*.
 
@@ -12,8 +12,8 @@ This project is a Automated Teller Machine built in **C++ Language** which inste
 
 ---
 
-<p>&nbsp;There will be **two modules** built which are the process of creating an account and for usual ATM transaction processes such as **Balance Inquiry, Withdraw Cash, Bank Transfer, etc.**.
-This repository will be used as a storage for source codes and a database for the accounts that will be created or registered.</p>
+There will be **two modules** built which are the process of creating an account and for usual ATM transaction processes such as **Balance Inquiry, Withdraw Cash, Bank Transfer, etc.**.
+This repository will be used as a storage for source codes and a database for the accounts that will be created or registered.
 
 The repository will contain the following:
 - **transaction module** - source code for ATM transaction processes
@@ -25,8 +25,7 @@ The repository will contain the following:
 <h2 align="left" > Github Collaboration: </h2>
 <p>Must have:</p>
 <ul>
-<li>VS CODE (back-end)</li>
-<li>Visual Studio 2022 (front-end)</li>
+<li>Visual Studio Code </li>
 <li>GitHub Account</li>
 <li>GitHub Desktop Application</li>
 </ul>
